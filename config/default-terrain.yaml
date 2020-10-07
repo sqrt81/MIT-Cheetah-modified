@@ -20,7 +20,7 @@ ground-plane:
     heightmap_file: true
     #heightmap_file: false 
     #heightmap_file_name: "heightmap_demo.txt"
-    #heightmap_file_name: "heightmap.txt"
+    heightmap_file_name: "heightmap.txt"
     #heightmap_file_name: "../optimization/optimization_data/2019-02-20-13_09_26/HeightMap.txt"
     #heightmap_file_name: "../optimization/optimization_data/2019-02-20-11_11_36/HeightMap.txt"
     #heightmap_file_name: "../optimization/optimization_data/2019-03-03-00_00_00/HeightMap.txt"
@@ -28,7 +28,7 @@ ground-plane:
     #heightmap_file_name: "../optimization/optimization_data/2019-03-05-00_00_01/manual_heightmap.txt"
     #heightmap_file_name: "../optimization/optimization_data/2019-03-05-00_00_02/manual_heightmap.txt"
     #heightmap_file_name: "../optimization/optimization_data/2019-03-05-00_00_03/heightmap.txt"
-    heightmap_file_name: "../algorithms/optimization/saved_optimization_data/2019-03-05-00_00_03_2/HeightMap.txt"
+    #heightmap_file_name: "../algorithms/optimization/saved_optimization_data/2019-03-05-00_00_03_2/HeightMap.txt"
 
 #box-1:
     type: "box"

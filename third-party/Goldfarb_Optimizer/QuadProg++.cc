@@ -48,7 +48,7 @@ void print_vector(char* name, const GVect<T>& v, int n = -1);
 
 // The Solving function, implementing the Goldfarb-Idnani method
 
-double solve_quadprog(Eigen::MatrixXd& _G, Eigen::VectorXd& _g0,
+double solve_quadprog1(Eigen::MatrixXd& _G, Eigen::VectorXd& _g0,
                       const Eigen::MatrixXd& _CE, const Eigen::VectorXd& _ce0,
                       const Eigen::MatrixXd& _CI, const Eigen::VectorXd& _ci0,
                       Eigen::VectorXd& _x){

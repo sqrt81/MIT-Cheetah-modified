@@ -6,7 +6,7 @@ include_directories("../lcm-types/cpp/")
 include_directories("../third-party/inih")       # inih includes
 include_directories("../third-party/osqp/include")       # osqp includes
 include_directories("../third-party/ParamHandler")
-include_directories("/usr/local/include/eigen3")   # lcm includes
+include_directories("/usr/include/eigen3")   # lcm includes
 include_directories("FootstepPlanner")
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
@@ -39,11 +39,15 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 # Test
-file(GLOB_RECURSE test_sources "test/test_*.cpp")             # test cpp files
-add_executable(test-common ${test_sources})
+#SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+
+file(GLOB_RECURSE test_sources "test/test_*.cpp")   # test cpp files
+file(GLOB_RECURSE gf_additional "../third-party/Goldfarb_Optimizer/*.cpp")
+add_executable(test-common ${test_sources} ${gf_additional})
 target_link_libraries(test-common gtest gmock_main lcm rt inih osqp dynacore_param_handler pthread biomimetics)
-target_link_libraries(test-common Goldfarb_Optimizer)
+#target_link_libraries(test-common Goldfarb_Optimizer)
 target_link_libraries(test-common JCQP)
+target_link_libraries(test-common qpOASES)
 
 
 add_test(NAME example_test COMMAND test-common)

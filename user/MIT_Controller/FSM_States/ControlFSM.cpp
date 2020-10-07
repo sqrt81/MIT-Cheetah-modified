@@ -314,6 +314,11 @@ void ControlFSM<T>::printInfo(int opt) {
                   << "\n";
         std::cout << std::endl;
 
+        // Set a probe for velocity.
+        std::cout << "velocity: "
+                  << data._stateEstimator->getResult().vBody.transpose()
+                  << std::endl;
+
         // Reset iteration counter
         printIter = 0;
       }

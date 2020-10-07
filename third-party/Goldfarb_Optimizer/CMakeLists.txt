@@ -1,8 +1,7 @@
-FILE(GLOB_RECURSE headers *.hh)
-FILE(GLOB_RECURSE sources *.cc)
+FILE(GLOB_RECURSE headers *.hh *.h)
+FILE(GLOB_RECURSE sources *.cc *.cpp)
 
-set(CMAKE_CXX_FLAGS "-O3 -no-pie -ggdb ") # no werror here!
-
+set(CMAKE_CXX_FLAGS "-O3 -ggdb ") # no werror here!
 
 add_library (Goldfarb_Optimizer SHARED ${headers} ${sources})
 #add_library (Goldfarb_Optimizer STATIC ${headers} ${sources})

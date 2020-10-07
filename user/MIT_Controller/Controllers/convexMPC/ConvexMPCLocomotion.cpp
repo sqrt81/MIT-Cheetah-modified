@@ -80,7 +80,7 @@ void ConvexMPCLocomotion::_SetupCommand(ControlFSMData<float> & data){
   }
 
   float x_vel_cmd, y_vel_cmd;
-  float filter(0.1);
+  float filter(0.001);
   if(data.controlParameters->use_rc){
     const rc_control_settings* rc_cmd = data._desiredStateCommand->rcCommand;
     data.userParameters->cmpc_gait = rc_cmd->variable[0];
@@ -288,6 +288,7 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
     Pf[0] +=  pfx_rel;
     Pf[1] +=  pfy_rel;
     Pf[2] = -0.003;
+    Pf += des_vel * 0.03;
     //Pf[2] = 0.0;
     footSwingTrajectories[i].setFinalPosition(Pf);
 
@@ -572,7 +573,7 @@ void ConvexMPCLocomotion::solveDenseMPC(int *mpcTable, ControlFSMData<float> &da
 
   //float Q[12] = {0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2};
 
-  float Q[12] = {0.25, 0.25, 10, 2, 2, 50, 0, 0, 0.3, 0.2, 0.2, 0.1};
+  float Q[12] = {10.25, 10.25, 10, 2, 2, 50, 0, 0, 0.3, 0.2, 0.2, 0.1};
 
   //float Q[12] = {0.25, 0.25, 10, 2, 2, 40, 0, 0, 0.3, 0.2, 0.2, 0.2};
   float yaw = seResult.rpy[2];
@@ -691,7 +692,7 @@ void ConvexMPCLocomotion::initSparseMPC() {
   }
 
   Vec12<double> weights;
-  weights << 0.25, 0.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2;
+  weights << 10.25, 10.25, 10, 2, 2, 20, 0, 0, 0.3, 0.2, 0.2, 0.2;
   //weights << 0,0,0,1,1,10,0,0,0,0.2,0.2,0;
 
   _sparseCMPC.setRobotParameters(baseInertia, mass, maxForce);

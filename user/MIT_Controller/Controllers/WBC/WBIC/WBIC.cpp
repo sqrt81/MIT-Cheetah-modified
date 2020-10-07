@@ -140,7 +140,7 @@ void WBIC<T>::_SetEqualityConstraint(const DVec<T>& qddot) {
 
   for (size_t i(0); i < _dim_eq_cstr; ++i) {
     for (size_t j(0); j < _dim_opt; ++j) {
-      CE[j][i] = _dyn_CE(i, j);
+      CE(j, i) = _dyn_CE(i, j);
     }
     ce0[i] = -_dyn_ce0[i];
   }
@@ -155,7 +155,7 @@ void WBIC<T>::_SetInEqualityConstraint() {
 
   for (size_t i(0); i < _dim_Uf; ++i) {
     for (size_t j(0); j < _dim_opt; ++j) {
-      CI[j][i] = _dyn_CI(i, j);
+      CI(j, i) = _dyn_CI(i, j);
     }
     ci0[i] = -_dyn_ci0[i];
   }
@@ -253,11 +253,11 @@ void WBIC<T>::_SetCost() {
   // Set Cost
   size_t idx_offset(0);
   for (size_t i(0); i < _dim_floating; ++i) {
-    G[i + idx_offset][i + idx_offset] = _data->_W_floating[i];
+    G(i + idx_offset, i + idx_offset) = _data->_W_floating[i];
   }
   idx_offset += _dim_floating;
   for (size_t i(0); i < _dim_rf; ++i) {
-    G[i + idx_offset][i + idx_offset] = _data->_W_rf[i];
+    G(i + idx_offset, i + idx_offset) = _data->_W_rf[i];
   }
   // pretty_print(_data->_W_floating, std::cout, "W floating");
   // pretty_print(_data->_W_rf, std::cout, "W rf");
@@ -290,17 +290,17 @@ void WBIC<T>::_SetOptimizationSize() {
   _dim_eq_cstr = _dim_floating;
 
   // Matrix Setting
-  G.resize(0., _dim_opt, _dim_opt);
-  g0.resize(0., _dim_opt);
-  CE.resize(0., _dim_opt, _dim_eq_cstr);
-  ce0.resize(0., _dim_eq_cstr);
+  G = Eigen::MatrixXd::Zero(_dim_opt, _dim_opt);
+  g0 = Eigen::VectorXd::Zero(_dim_opt);
+  CE = Eigen::MatrixXd::Zero(_dim_opt, _dim_eq_cstr);
+  ce0 = Eigen::VectorXd::Zero(_dim_eq_cstr);
 
   // Eigen Matrix Setting
   _dyn_CE = DMat<T>::Zero(_dim_eq_cstr, _dim_opt);
   _dyn_ce0 = DVec<T>(_dim_eq_cstr);
   if (_dim_rf > 0) {
-    CI.resize(0., _dim_opt, _dim_Uf);
-    ci0.resize(0., _dim_Uf);
+    CI = Eigen::MatrixXd::Zero(_dim_opt, _dim_Uf);
+    ci0 = Eigen::VectorXd::Zero(_dim_Uf);
     _dyn_CI = DMat<T>::Zero(_dim_Uf, _dim_opt);
     _dyn_ci0 = DVec<T>(_dim_Uf);
 
@@ -312,8 +312,8 @@ void WBIC<T>::_SetOptimizationSize() {
     _Uf.setZero();
     _Uf_ieq_vec = DVec<T>(_dim_Uf);
   } else {
-    CI.resize(0., _dim_opt, 1);
-    ci0.resize(0., 1);
+    CI = Eigen::MatrixXd::Zero(_dim_opt, 1);
+    ci0 = Eigen::VectorXd::Zero(1);
   }
 }
 

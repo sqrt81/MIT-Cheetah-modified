@@ -14,10 +14,11 @@
 
 #define termios asmtermios
 
-#include <asm/termios.h>
+//#include <asm/termios.h>
+#include <asm/termbits.h>
+//#include <asm/ioctls.h>
 
 #undef termios
-
 #include <termios.h>
 #include <math.h>
 #include <pthread.h>
@@ -26,6 +27,8 @@
 #include <stdint.h>
 
 #include "rt/rt_serial.h"
+#include <sys/ioctl.h>
+//extern int ioctl (int __fd, unsigned long int __request, ...) __THROW;
 
 void init_serial_for_sbus(int fd, int baud) {
   printf("\t[RT SERIAL] Configuring serial device...\n");

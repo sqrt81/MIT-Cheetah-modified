@@ -58,18 +58,18 @@ class WBIC : public WBC<T> {
 
   WBIC_ExtraData<T>* _data;
 
-  GolDIdnani::GVect<double> z;
+  Eigen::VectorXd z;
   // Cost
-  GolDIdnani::GMatr<double> G;
-  GolDIdnani::GVect<double> g0;
+  Eigen::MatrixXd G;
+  Eigen::VectorXd g0;
 
   // Equality
-  GolDIdnani::GMatr<double> CE;
-  GolDIdnani::GVect<double> ce0;
+  Eigen::MatrixXd CE;
+  Eigen::VectorXd ce0;
 
   // Inequality
-  GolDIdnani::GMatr<double> CI;
-  GolDIdnani::GVect<double> ci0;
+  Eigen::MatrixXd CI;
+  Eigen::VectorXd ci0;
 
   DMat<T> _dyn_CE;
   DVec<T> _dyn_ce0;

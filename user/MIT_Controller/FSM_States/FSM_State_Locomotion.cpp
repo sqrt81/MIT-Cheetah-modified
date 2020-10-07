@@ -83,7 +83,7 @@ FSM_StateName FSM_State_Locomotion<T>::checkTransition() {
   iter++;
 
   // Switch FSM control mode
-  if(locomotionSafe()) {
+  if(locomotionSafe() || true /* disable */) {
     switch ((int)this->_data->controlParameters->control_mode) {
       case K_LOCOMOTION:
         break;
@@ -192,8 +192,8 @@ template<typename T>
 bool FSM_State_Locomotion<T>::locomotionSafe() {
   auto& seResult = this->_data->_stateEstimator->getResult();
 
-  const T max_roll = 40;
-  const T max_pitch = 40;
+  const T max_roll = 25;
+  const T max_pitch = 25;
 
   if(std::fabs(seResult.rpy[0]) > ori::deg2rad(max_roll)) {
     printf("Unsafe locomotion: roll is %.3f degrees (max %.3f)\n", ori::rad2deg(seResult.rpy[0]), max_roll);
@@ -248,6 +248,12 @@ void FSM_State_Locomotion<T>::LocomotionControlStep() {
 
   // Contact state logic
   // estimateContact();
+
+  if(!locomotionSafe())
+  {
+      this->_data->_desiredStateCommand->leftAnalogStick[0] = 0.;
+      this->_data->_desiredStateCommand->leftAnalogStick[1] = 0.;
+  }
 
   cMPCOld->run<T>(*this->_data);
   Vec3<T> pDes_backup[4];

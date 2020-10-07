@@ -70,6 +70,8 @@ void DesiredStateCommand<T>::convertToStateCommands() {
   leftAnalogStick = leftAnalogStick * (T(1) - filter) + joystickLeft * filter;
   rightAnalogStick = rightAnalogStick * (T(1) - filter) + joystickRight * filter;
 
+  leftAnalogStick[1] = 4.; // no joystick used, give a fixed value
+
   // Desired states from the controller
   data.stateDes(6) = deadband(leftAnalogStick[1], minVelX, maxVelX);  // forward linear velocity
   data.stateDes(7) = deadband(leftAnalogStick[0], minVelY, maxVelY);  // lateral linear velocity
