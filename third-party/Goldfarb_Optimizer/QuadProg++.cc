@@ -48,7 +48,7 @@ void print_vector(char* name, const GVect<T>& v, int n = -1);
 
 // The Solving function, implementing the Goldfarb-Idnani method
 
-double solve_quadprog1(Eigen::MatrixXd& _G, Eigen::VectorXd& _g0,
+double solve_quadprog(Eigen::MatrixXd& _G, Eigen::VectorXd& _g0,
                       const Eigen::MatrixXd& _CE, const Eigen::VectorXd& _ce0,
                       const Eigen::MatrixXd& _CI, const Eigen::VectorXd& _ci0,
                       Eigen::VectorXd& _x){
@@ -112,27 +112,27 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
 {
   std::ostringstream msg;
   int n = G.ncols(), p = CE.ncols(), m = CI.ncols();
-  if (G.nrows() != n)
+  if (G.nrows() != (unsigned)n)
   {
     msg << "The matrix G is not a squared matrix (" << G.nrows() << " x " << G.ncols() << ")";
     throw std::logic_error(msg.str());
   }
-  if (CE.nrows() != n)
+  if (CE.nrows() != (unsigned)n)
   {
     msg << "The matrix CE is incompatible (incorrect number of rows " << CE.nrows() << " , expecting " << n << ")";
     throw std::logic_error(msg.str());
   }
-  if (ce0.size() != p)
+  if (ce0.size() != (unsigned)p)
   {
     msg << "The vector ce0 is incompatible (incorrect dimension " << ce0.size() << ", expecting " << p << ")";
     throw std::logic_error(msg.str());
   }
-  if (CI.nrows() != n)
+  if (CI.nrows() != (unsigned)n)
   {
     msg << "The matrix CI is incompatible (incorrect number of rows " << CI.nrows() << " , expecting " << n << ")";
     throw std::logic_error(msg.str());
   }
-  if (ci0.size() != m)
+  if (ci0.size() != (unsigned)m)
   {
     msg << "The vector ci0 is incompatible (incorrect dimension " << ci0.size() << ", expecting " << m << ")";
     throw std::logic_error(msg.str());
@@ -167,6 +167,7 @@ double solve_quadprog(GMatr<double>& G, GVect<double>& g0,
   print_vector("ci0", ci0);
 #endif
 
+  (void) q;
   /*
    * Preprocessing phase
    */
@@ -538,6 +539,7 @@ inline void update_r(const GMatr<double>& R, GVect<double>& r, const GVect<doubl
 {
   register int i, j, n = d.size();
   register double sum;
+    (void) n;
 
   /* setting of r = R^-1 d */
   for (i = iq - 1; i >= 0; i--)

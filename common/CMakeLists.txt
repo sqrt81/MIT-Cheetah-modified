@@ -42,7 +42,10 @@ endif()
 #SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 
 file(GLOB_RECURSE test_sources "test/test_*.cpp")   # test cpp files
-file(GLOB_RECURSE gf_additional "../third-party/Goldfarb_Optimizer/*.cpp")
+file(GLOB_RECURSE gf_additional
+    "../third-party/Goldfarb_Optimizer/*.cpp"
+    "../third-party/Goldfarb_Optimizer/*.cc")
+
 add_executable(test-common ${test_sources} ${gf_additional})
 target_link_libraries(test-common gtest gmock_main lcm rt inih osqp dynacore_param_handler pthread biomimetics)
 #target_link_libraries(test-common Goldfarb_Optimizer)
