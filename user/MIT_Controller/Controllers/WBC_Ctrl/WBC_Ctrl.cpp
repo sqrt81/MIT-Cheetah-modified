@@ -1,6 +1,7 @@
 #include "WBC_Ctrl.hpp"
 #include <Utilities/Utilities_print.h>
 #include <Utilities/Timer.h>
+#include <sys/time.h>
 
 template<typename T>
 WBC_Ctrl<T>::WBC_Ctrl(FloatingBaseModel<T> model):
@@ -47,6 +48,13 @@ WBC_Ctrl<T>::~WBC_Ctrl(){
   }
   _task_list.clear();
 
+  iter = _task_list_all_foot.begin();
+    while (iter < _task_list_all_foot.end()) {
+      delete (*iter);
+      ++iter;
+    }
+    _task_list_all_foot.clear();
+
   typename std::vector<ContactSpec<T> *>::iterator iter2 = _contact_list.begin();
   while (iter2 < _contact_list.end()) {
     delete (*iter2);
@@ -58,7 +66,7 @@ WBC_Ctrl<T>::~WBC_Ctrl(){
 template <typename T>
 void WBC_Ctrl<T>::_ComputeWBC() {
   // TEST
-  _kin_wbc->FindConfiguration(_full_config, _task_list, _contact_list,
+  _kin_wbc->FindConfiguration(_full_config, _task_list_all_foot, _contact_list,
                               _des_jpos, _des_jvel);
 
   // WBIC
@@ -68,6 +76,10 @@ void WBC_Ctrl<T>::_ComputeWBC() {
 
 template<typename T>
 void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
+
+    static int cnt = 0;
+    struct timeval t1, t2;
+    gettimeofday(&t1, NULL);
   ++_iter;
 
   // Update Model
@@ -95,6 +107,16 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
 
   // LCM publish
   _LCM_PublishData();
+
+  gettimeofday(&t2, NULL);
+  cnt += (t2.tv_sec - t1.tv_sec) * 1000000
+          + (t2.tv_usec - t1.tv_usec);
+
+  if(_iter % 1000 == 0)
+  {
+      std::cout << "WBC cost mean: " << cnt / 1000 << "us" << std::endl;
+      cnt = 0;
+  }
 }
 
 

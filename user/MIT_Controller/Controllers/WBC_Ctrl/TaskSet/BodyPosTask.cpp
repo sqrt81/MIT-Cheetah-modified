@@ -24,6 +24,7 @@ template <typename T>
 bool BodyPosTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
                                     const DVec<T>& acc_des) {
   Vec3<T>* pos_cmd = (Vec3<T>*)pos_des;
+  TK::pos_des_ = *pos_cmd;
   Vec3<T> link_pos = _robot_sys->_state.bodyPosition;
 
   Quat<T> quat = _robot_sys->_state.bodyOrientation;

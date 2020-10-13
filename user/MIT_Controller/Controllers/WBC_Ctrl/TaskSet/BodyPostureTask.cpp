@@ -26,6 +26,7 @@ template <typename T>
 bool BodyPostureTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
                                         const DVec<T>& acc_des) {
   DVec<T>* pos_cmd = (DVec<T>*)pos_des;
+  TK::pos_des_ = *pos_cmd;
 
   // Orientation (w, x, y, z)
   Quat<T> ori_cmd;

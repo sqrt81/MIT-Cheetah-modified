@@ -36,6 +36,7 @@ class Task {
   size_t getDim() { return dim_task_; }
   void UnsetTask() { b_set_task_ = false; }
 
+  const DVec<T>& getDesPos() { return pos_des_; }
   const DVec<T>& getPosError() { return pos_err_; }
   const DVec<T>& getDesVel() { return vel_des_; }
   const DVec<T>& getDesAcc() { return acc_des_; }
@@ -58,6 +59,7 @@ class Task {
   DVec<T> JtDotQdot_;
   DMat<T> Jt_;
 
+  DVec<T> pos_des_;
   DVec<T> pos_err_;
   DVec<T> vel_des_;
   DVec<T> acc_des_;

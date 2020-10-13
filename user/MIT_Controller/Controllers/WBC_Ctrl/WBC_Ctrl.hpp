@@ -44,6 +44,7 @@ class WBC_Ctrl{
     FloatingBaseModel<T> _model;
     std::vector<ContactSpec<T> * > _contact_list;
     std::vector<Task<T> * > _task_list;
+    std::vector<Task<T> * > _task_list_all_foot;
 
     DMat<T> _A;
     DMat<T> _Ainv;

@@ -55,21 +55,26 @@ void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data
 
   WBCtrl::_task_list.push_back(_body_ori_task);
   WBCtrl::_task_list.push_back(_body_pos_task);
+  WBCtrl::_task_list_all_foot.push_back(_body_ori_task);
+  WBCtrl::_task_list_all_foot.push_back(_body_pos_task);
 
   for(size_t leg(0); leg<4; ++leg){
+
+      _foot_task[leg]->UpdateTask(
+          &(_input_data->pFoot_des[leg]),
+          _input_data->vFoot_des[leg],
+          _input_data->aFoot_des[leg]);
+
     if(_input_data->contact_state[leg] > 0.){ // Contact
       _foot_contact[leg]->setRFDesired((DVec<T>)(_input_data->Fr_des[leg]));
       _foot_contact[leg]->UpdateContactSpec();
       WBCtrl::_contact_list.push_back(_foot_contact[leg]);
-
     }else{ // No Contact (swing)
-      _foot_task[leg]->UpdateTask(
-          &(_input_data->pFoot_des[leg]), 
-          _input_data->vFoot_des[leg], 
-          _input_data->aFoot_des[leg]);
           //zero_vec3);
       WBCtrl::_task_list.push_back(_foot_task[leg]);
     }
+
+    WBCtrl::_task_list_all_foot.push_back(_foot_task[leg]);
   }
 }
 
@@ -150,6 +155,7 @@ template<typename T>
 void LocomotionCtrl<T>::_CleanUp(){
   WBCtrl::_contact_list.clear();
   WBCtrl::_task_list.clear();
+  WBCtrl::_task_list_all_foot.clear();
 }
 
 template<typename T>
