@@ -74,6 +74,9 @@ KinWBC<T>::KinWBC(size_t num_qdot)
 //    jpos_cmd[i] = curr_config[i + 6] + delta_q[i + 6];
 //    jvel_cmd[i] = qdot[i + 6];
 //  }
+
+//  std::cout << "jpos: " << jpos_cmd.transpose() << std::endl;
+//  std::cout << "jvel: " << jvel_cmd.transpose() << std::endl;
 //  return true;
 //}
 
@@ -112,9 +115,6 @@ bool KinWBC<T>::FindConfiguration(
                                  - rot_vel.cross(rel_pos));
         rel_pos = rot * rel_pos; // transfer to local
 
-//        std::cout << "foot " << i << " : "
-//                  << rel_pos.transpose() << std::endl;
-
         if (i >= 2) {
             rel_pos.x() = - rel_pos.x();
             rel_vel.x() = - rel_vel.x();
@@ -124,13 +124,16 @@ bool KinWBC<T>::FindConfiguration(
             rel_vel.y() = - rel_vel.y();
         }
 
+//        std::cout << "foot " << i << " : "
+//                  << rel_pos.transpose() << std::endl;
+
         Vec3<T> joint_pos = DogPhysics::InverseKinematics(
                     rel_pos.template cast<double>(), i >= 2, true)
                 .template cast<T>();
         Vec3<T> joint_vel = DogPhysics::ComputeJointVel(
                     rel_vel.template cast<double>(),
                     joint_pos.template cast<double>()).template cast<T>();
-        if (i % 2 == 1) {
+        if (i % 2 == 0) {
             joint_pos[0] = - joint_pos[0];
             joint_vel[0] = - joint_vel[0];
         }

@@ -246,7 +246,7 @@ void FSM_State_BalanceStand<T>::BalanceStandStep() {
   for(size_t i(0); i<4; ++i){
 //    _wbc_data->pFoot_des[i].setZero();
       _wbc_data->pFoot_des[i][0] = 0.19 * (i < 2 ? 1 : - 1);
-      _wbc_data->pFoot_des[i][1] = 0.12 * ((i % 2 == 0) ? 1 : - 1);
+      _wbc_data->pFoot_des[i][1] = 0.12 * ((i % 2 == 1) ? 1 : - 1);
       _wbc_data->pFoot_des[i] += _ini_body_pos;
       _wbc_data->pFoot_des[i][2] = 0.;
     _wbc_data->vFoot_des[i].setZero();
