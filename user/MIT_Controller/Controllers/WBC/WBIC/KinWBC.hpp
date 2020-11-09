@@ -11,6 +11,12 @@ class KinWBC {
   KinWBC(size_t num_qdot);
   ~KinWBC() {}
 
+  void SetLegConfig(int leg_id, bool knee_out, bool hip_out)
+  {
+      leg_config[leg_id][0] = knee_out;
+      leg_config[leg_id][1] = hip_out;
+  }
+
   bool FindConfiguration(const DVec<T>& curr_config,
                          const std::vector<Task<T>*>& task_list,
                          const std::vector<ContactSpec<T>*>& contact_list,
@@ -21,6 +27,8 @@ class KinWBC {
  private:
   void _PseudoInverse(const DMat<T> J, DMat<T>& Jinv);
   void _BuildProjectionMatrix(const DMat<T>& J, DMat<T>& N);
+
+  bool leg_config[4][2];
 
   double threshold_;
   size_t num_qdot_;

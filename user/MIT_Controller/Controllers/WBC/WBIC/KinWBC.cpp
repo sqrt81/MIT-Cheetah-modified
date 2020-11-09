@@ -8,6 +8,11 @@ template <typename T>
 KinWBC<T>::KinWBC(size_t num_qdot)
     : threshold_(0.001), num_qdot_(num_qdot), num_act_joint_(num_qdot - 6) {
   I_mtx = DMat<T>::Identity(num_qdot_, num_qdot_);
+
+  SetLegConfig(0, false, true);
+  SetLegConfig(1, false, true);
+  SetLegConfig(2, true, true);
+  SetLegConfig(3, true, true);
 }
 
 //template <typename T>
@@ -128,7 +133,8 @@ bool KinWBC<T>::FindConfiguration(
 //                  << rel_pos.transpose() << std::endl;
 
         Vec3<T> joint_pos = DogPhysics::InverseKinematics(
-                    rel_pos.template cast<double>(), i >= 2, true)
+                    rel_pos.template cast<double>(),
+                    leg_config[i][0], leg_config[i][1])
                 .template cast<T>();
         Vec3<T> joint_vel = DogPhysics::ComputeJointVel(
                     rel_vel.template cast<double>(),
@@ -149,8 +155,8 @@ bool KinWBC<T>::FindConfiguration(
         jvel_cmd.template segment<3>(i * 3) = joint_vel;
     }
 
-//    std::cout << "jpos: " << jpos_cmd.transpose() << std::endl;
-//    std::cout << "jvel: " << jvel_cmd.transpose() << std::endl;
+//    std::cout << "jpos: " << jpos_cmd.template segment<3>(3).transpose() << std::endl;
+//    std::cout << "jvel: " << jvel_cmd.template segment<3>(3).transpose() << std::endl;
 
     return true;
 }

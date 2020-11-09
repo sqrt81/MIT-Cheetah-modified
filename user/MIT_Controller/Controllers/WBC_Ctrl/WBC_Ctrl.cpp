@@ -3,6 +3,8 @@
 #include <Utilities/Timer.h>
 #include <sys/time.h>
 
+#include "LocomotionCtrl/LocomotionCtrl.hpp"
+
 template<typename T>
 WBC_Ctrl<T>::WBC_Ctrl(FloatingBaseModel<T> model):
   _full_config(cheetah::num_act_joint + 7),
@@ -64,10 +66,21 @@ WBC_Ctrl<T>::~WBC_Ctrl(){
 }
 
 template <typename T>
-void WBC_Ctrl<T>::_ComputeWBC() {
+void WBC_Ctrl<T>::_ComputeWBC(void * data) {
   // TEST
   _kin_wbc->FindConfiguration(_full_config, _task_list_all_foot, _contact_list,
                               _des_jpos, _des_jvel);
+
+  auto data_ptr = static_cast<LocomotionCtrlData<T>* >(data);
+
+  for (int i = 0; i < 4; i++)
+  {
+      if (data_ptr->use_jpos_des[i])
+      {
+          _des_jpos.template segment<3>(i * 3) = data_ptr->jpos_des[i];
+          _des_jvel.template segment<3>(i * 3) = data_ptr->jvel_des[i];
+      }
+  }
 
   // WBIC
   _wbic->UpdateSetting(_A, _Ainv, _coriolis, _grav);
@@ -76,10 +89,6 @@ void WBC_Ctrl<T>::_ComputeWBC() {
 
 template<typename T>
 void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
-
-    static int cnt = 0;
-    struct timeval t1, t2;
-    gettimeofday(&t1, NULL);
   ++_iter;
 
   // Update Model
@@ -89,7 +98,7 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
   _ContactTaskUpdate(input, data);
 
   // WBC Computation
-  _ComputeWBC();
+  _ComputeWBC(input);
   
   // TEST
   //T dt(0.002);
@@ -107,16 +116,6 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
 
   // LCM publish
   _LCM_PublishData();
-
-  gettimeofday(&t2, NULL);
-  cnt += (t2.tv_sec - t1.tv_sec) * 1000000
-          + (t2.tv_usec - t1.tv_usec);
-
-  if(_iter % 1000 == 0)
-  {
-      std::cout << "WBC cost mean: " << cnt / 1000 << "us" << std::endl;
-      cnt = 0;
-  }
 }
 
 
@@ -146,7 +145,6 @@ void WBC_Ctrl<T>::_UpdateLegCMD(ControlFSMData<T> & data){
 
     }
   }
-
 
   // Knee joint non flip barrier
   for(size_t leg(0); leg<4; ++leg){

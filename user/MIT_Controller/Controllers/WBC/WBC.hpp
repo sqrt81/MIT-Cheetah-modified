@@ -34,7 +34,7 @@ class WBC {
  protected:
   // full rank fat matrix only
   void _WeightedInverse(const DMat<T>& J, const DMat<T>& Winv, DMat<T>& Jinv,
-                        double threshold = 0.0001) {
+                        double threshold = 0.01) {
     DMat<T> lambda(J * Winv * J.transpose());
     DMat<T> lambda_inv;
     pseudoInverse(lambda, threshold, lambda_inv);

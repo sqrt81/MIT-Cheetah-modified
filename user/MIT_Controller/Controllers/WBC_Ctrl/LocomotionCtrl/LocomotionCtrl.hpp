@@ -19,6 +19,10 @@ class LocomotionCtrlData{
     Vec3<T> Fr_des[4];
 
     Vec4<T> contact_state;
+
+    Vec3<T> jpos_des[4];
+    Vec3<T> jvel_des[4];
+    bool use_jpos_des[4] = {false, false, false, false};
 };
 
 template<typename T>

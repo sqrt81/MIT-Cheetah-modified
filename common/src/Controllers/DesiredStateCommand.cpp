@@ -67,6 +67,10 @@ void DesiredStateCommand<T>::convertToStateCommands() {
   joystickLeft[0] *= -1.f;
   joystickRight[0] *= -1.f;
 
+  joystickLeft[1] = 0.5;
+  joystickRight[0] = 0.1;
+  joystickRight[1] = 0.2;
+
   leftAnalogStick = leftAnalogStick * (T(1) - filter) + joystickLeft * filter;
   rightAnalogStick = rightAnalogStick * (T(1) - filter) + joystickRight * filter;
 

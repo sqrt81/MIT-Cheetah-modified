@@ -5,6 +5,23 @@
 
 namespace DogPhysics
 {
+    Eigen::Vector3d ForwardKinematics(const Eigen::Vector3d &joint_pos);
+
+    /**
+     * @brief InverseKinematics
+     * Computes desired joint positions of FL leg
+     * with the target foot position.
+     * @param foot_pos      target foot position.
+     * @param joint_pos     desired joint position.
+     * @param knee_out      if the knee curves outwards
+     * @param hip_out       if the thigh is at side of the torso
+     */
+    Eigen::Vector3d InverseKinematics(const Eigen::Vector3d &foot_pos,
+                                      bool knee_out, bool hip_out);
+
+    void GetLegConfig(const Eigen::Vector3d &joint_pos,
+                      bool &hip_out, bool &knee_out);
+
     /**
      * @brief ComputeJacobian
      * Computes joint jacobian.
@@ -30,18 +47,6 @@ namespace DogPhysics
      */
     Eigen::Vector3d ComputeJointVel(const Eigen::Vector3d& foot_vel,
                                     const Eigen::Vector3d& joint_pos);
-
-    /**
-     * @brief InverseKinematics
-     * Computes desired joint positions of FL leg
-     * with the target foot position.
-     * @param foot_pos      target foot position.
-     * @param joint_pos     desired joint position.
-     * @param knee_out      if the knee curves outwards
-     * @param hip_out       if the thigh is at side of the torso
-     */
-    Eigen::Vector3d InverseKinematics(const Eigen::Vector3d &foot_pos,
-                                      bool knee_out, bool hip_out);
 
 } /* DogPhysics */
 

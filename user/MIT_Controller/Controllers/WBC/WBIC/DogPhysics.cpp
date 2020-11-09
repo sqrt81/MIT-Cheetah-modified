@@ -17,6 +17,23 @@ constexpr double hip_len_y_ = 0.062;
 constexpr double thigh_offset_z_ = - 0.209;
 constexpr double shin_offset_z_ = - 0.2;
 
+Eigen::Vector3d ForwardKinematics(const Eigen::Vector3d &joint_pos)
+{
+    const double c1 = cos(joint_pos(0));
+    const double s1 = sin(joint_pos(0));
+    const double c2 = cos(joint_pos(1));
+    const double s2 = sin(joint_pos(1));
+    const double c23 = cos(joint_pos(1) + joint_pos(2));
+    const double s23 = sin(joint_pos(1) + joint_pos(2));
+
+    const double shin_z = thigh_offset_z_ * c2 + shin_offset_z_ * c23;
+    const double shin_x = thigh_offset_z_ * s2 + shin_offset_z_ * s23;
+
+    return Eigen::Vector3d(
+                hip_pos_x_ + shin_x,
+                hip_len_y_ * c1 - shin_z * s1 + hip_pos_y_,
+                hip_len_y_ * s1 + shin_z * c1);
+}
 
 Eigen::Vector3d InverseKinematics(const Eigen::Vector3d &foot_pos,
                                   bool knee_out, bool hip_out)
@@ -24,7 +41,6 @@ Eigen::Vector3d InverseKinematics(const Eigen::Vector3d &foot_pos,
     const double x_h = foot_pos.x() - hip_pos_x_;
     const double y_h = foot_pos.y() - hip_pos_y_;
     const double z_t = foot_pos.z();
-
     const double cos_11 = hip_len_y_ / sqrt(z_t * z_t + y_h * y_h);
 
     const double angle_11 = acos(cos_11 < 1. ? cos_11 : 1.);
@@ -43,10 +59,29 @@ Eigen::Vector3d InverseKinematics(const Eigen::Vector3d &foot_pos,
     const double q3 = knee_out ? angle_3 : (- angle_3);
     const double sin_22 = shin_offset_z_ * sin(q3) / sqrt(leg_len_2);
 
-    const double q2 = - atan2(x_h, w_h)
+    const double q21 = - atan2(x_h, w_h);
+    const double q2 = (q21 < M_PI_2 ? q21 : q21 - 2 * M_PI)
             + asin(std::max(std::min(sin_22, 1.), - 1.));
 
     return Eigen::Vector3d(q1, q2, q3);
+}
+
+void GetLegConfig(const Eigen::Vector3d &joint_pos,
+                  bool &hip_out, bool &knee_out)
+{
+    knee_out = joint_pos(2) > 0;
+
+    const double c1 = cos(joint_pos(0));
+    const double s1 = sin(joint_pos(0));
+    const double c2 = cos(joint_pos(1));
+    const double c23 = cos(joint_pos(1) + joint_pos(2));
+
+    const double shin_z = thigh_offset_z_ * c2 + shin_offset_z_ * c23;
+    const double y_h = hip_len_y_ * c1 - shin_z * s1;
+    const double z_h = hip_len_y_ * s1 + shin_z * c1;
+    const double angle_12 = atan2(z_h, y_h);
+
+    hip_out = joint_pos(0) > angle_12;
 }
 
 Eigen::Matrix3d ComputeJacobian(const Eigen::Vector3d &joint_pos)

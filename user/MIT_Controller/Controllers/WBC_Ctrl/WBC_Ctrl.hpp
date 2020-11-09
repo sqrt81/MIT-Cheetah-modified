@@ -21,6 +21,11 @@ class WBC_Ctrl{
     WBC_Ctrl(FloatingBaseModel<T> model);
     virtual ~WBC_Ctrl();
 
+    void SetLegConfig(int leg_id, bool hip_out, bool knee_out)
+    {
+        _kin_wbc->SetLegConfig(leg_id, knee_out, hip_out);
+    }
+
     void run(void * input, ControlFSMData<T> & data);
     void setFloatingBaseWeight(const T & weight){
       _wbic_data->_W_floating = DVec<T>::Constant(6, weight);
@@ -35,7 +40,7 @@ class WBC_Ctrl{
     virtual void _LCM_PublishData(){}
     void _UpdateModel(const StateEstimate<T> & state_est, const LegControllerData<T> * leg_data);
     void _UpdateLegCMD(ControlFSMData<T> & data);
-    void _ComputeWBC();
+    void _ComputeWBC(void * data);
 
     KinWBC<T>* _kin_wbc;
     WBIC<T>* _wbic;

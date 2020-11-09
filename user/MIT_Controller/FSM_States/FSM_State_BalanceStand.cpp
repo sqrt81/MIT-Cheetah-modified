@@ -45,7 +45,8 @@ void FSM_State_BalanceStand<T>::onEnter() {
 
     this->_data->leg_motion = new OneLegMotion();
     this->_data->leg_motion->SetMotion(1, 1., 3., true, false,
-                                       {0.2, 0.1, - 0.3}, {0.2, 0.1, 0.3});
+    {0.19, 0.12, - 0.3}, false, true,
+    {0.19, 0.12, 0.3}, false, false);
   
   _ini_body_pos = (this->_data->_stateEstimator->getResult()).position;
 
@@ -258,6 +259,7 @@ void FSM_State_BalanceStand<T>::BalanceStandStep() {
     _wbc_data->Fr_des[i].setZero();
     _wbc_data->Fr_des[i][2] = _body_weight/4.;
     _wbc_data->contact_state[i] = true;
+    _wbc_data->use_jpos_des[i] = false;
   }
 
   // if leg raise commanded
@@ -274,21 +276,41 @@ void FSM_State_BalanceStand<T>::BalanceStandStep() {
       _wbc_data->pBody_des[0] += offset.x();
       _wbc_data->pBody_des[1] += offset.y();
 
+      const auto& res = this->_data->_stateEstimator->getResult();
+      Eigen::Quaternion<T> rot(res.orientation[0],
+                               res.orientation[1],
+                               res.orientation[2],
+                               res.orientation[3]);
+
       Eigen::Vector3d foot_pos, foot_vel;
       bool contact;
-      this->_data->leg_motion->Sample(cur_time, foot_pos, foot_vel, contact);
-      _wbc_data->pFoot_des[leg_id] = foot_pos.cast<T>() + _wbc_data->pBody_des;
-      _wbc_data->vFoot_des[leg_id] = foot_vel.cast<T>();
+      bool hip_out, knee_out;
+      this->_data->leg_motion->Sample(cur_time, foot_pos, foot_vel, contact,
+                                      hip_out, knee_out);
+      _wbc_ctrl->SetLegConfig(leg_id, hip_out, knee_out);
+      _wbc_data->pFoot_des[leg_id] = rot * foot_pos.cast<T>()
+              + res.position;
+      _wbc_data->vFoot_des[leg_id]
+              = rot * (foot_vel.cast<T>() + res.vBody
+                       + res.omegaBody.cross(foot_pos.cast<T>()));
+
+      Eigen::Vector3d jpos, jvel;
+      this->_data->leg_motion->SampleJoint(cur_time, jpos, jvel);
+      _wbc_data->use_jpos_des[leg_id] = true;
+      _wbc_data->jpos_des[leg_id] = jpos.cast<T>();
+      _wbc_data->jvel_des[leg_id] = jvel.cast<T>();
 
       if (!contact)
         _wbc_data->Fr_des[leg_id].setZero();
 
-      std::cout << "body " << _wbc_data->pBody_des.transpose() << std::endl;
-      std::cout << "foot " << _wbc_data->pFoot_des[leg_id].transpose() << std::endl;
+      Vec4<T> contactState
+              = this->_data->_stateEstimator->getResult().contactEstimate;
+      contactState[leg_id] = contact;
+      this->_data->_stateEstimator->setContactPhase(contactState);
 
-      _wbc_data->contact_state[leg_id] = contact ? 1. : -1.;
+      _wbc_data->contact_state[leg_id] = contact ? 1. : 0.;
   }
-  
+
   if(this->_data->_desiredStateCommand->trigger_pressed) {
     _wbc_data->pBody_des[2] = 0.05;
 
