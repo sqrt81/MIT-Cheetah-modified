@@ -27,6 +27,7 @@ template <typename T>
 bool BodyOriTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
                                     const DVec<T>& acc_des) {
   Quat<T>* ori_cmd = (Quat<T>*)pos_des;
+  TK::pos_des_ = *ori_cmd;
   Quat<T> link_ori = (_robot_sys->_state.bodyOrientation);
 
   Quat<T> link_ori_inv;

@@ -27,6 +27,7 @@ template <typename T>
 bool LinkPosTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
                                     const DVec<T>& acc_des) {
   Vec3<T>* pos_cmd = (Vec3<T>*)pos_des;
+  TK::pos_des_ = *pos_cmd;
   Vec3<T> link_pos;
 
   link_pos = robot_sys_->_pGC[link_idx_];

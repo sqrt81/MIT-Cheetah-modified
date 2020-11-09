@@ -1,4 +1,4 @@
-FILE(GLOB_RECURSE headers *.hpp)
+FILE(GLOB_RECURSE headers *.hpp *.h)
 FILE(GLOB_RECURSE sources *.cpp)
 
 
