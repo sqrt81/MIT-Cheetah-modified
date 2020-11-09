@@ -16,12 +16,15 @@ include_directories(${PROJECT_SOURCE_DIR})
 file(GLOB_RECURSE sources
 "./*.cpp"
 "FSM_States/*.cpp" 
+"TrajFollower/*.cpp"
 "Controllers/BalanceController/*.cpp" 
 "Controllers/convexMPC/*.cpp")
 
 add_subdirectory(Controllers/WBC)
 add_subdirectory(Controllers/WBC_Ctrl)
 add_subdirectory(Controllers/VisionMPC)
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
 
 add_executable(mit_ctrl ${sources} MIT_Controller.cpp main.cpp)
 target_link_libraries(mit_ctrl robot biomimetics)

@@ -57,6 +57,10 @@ void FSM_State_Locomotion<T>::onEnter() {
   this->transitionData.zero();
   cMPCOld->initialize();
   this->_data->_gaitScheduler->gaitData._nextGait = GaitType::TROT;
+  this->_data->traj = new TrajHolder();
+  this->_data->traj->LoadFromFile("state_des.csv");
+  this->_data->traj->SetActive(true);
+  this->_data->traj->SetCurTime(0.);
   printf("[FSM LOCOMOTION] On Enter\n");
 }
 

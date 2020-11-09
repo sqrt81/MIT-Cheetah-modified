@@ -42,10 +42,14 @@ void FSM_State_BalanceStand<T>::onEnter() {
 
   // Always set the gait to be standing in this state
   this->_data->_gaitScheduler->gaitData._nextGait = GaitType::STAND;
+
+    this->_data->leg_motion = new OneLegMotion();
+    this->_data->leg_motion->SetMotion(1, 1., 3., true, false,
+                                       {0.2, 0.1, - 0.3}, {0.2, 0.1, 0.3});
   
   _ini_body_pos = (this->_data->_stateEstimator->getResult()).position;
 
-  if(_ini_body_pos[2] < 0.2) {
+  if(_ini_body_pos[2] < 0.3) {
     _ini_body_pos[2] = 0.3;
   }
 
@@ -250,6 +254,35 @@ void FSM_State_BalanceStand<T>::BalanceStandStep() {
     _wbc_data->Fr_des[i].setZero();
     _wbc_data->Fr_des[i][2] = _body_weight/4.;
     _wbc_data->contact_state[i] = true;
+  }
+
+  // if leg raise commanded
+  if (this->_data->leg_motion)
+  {
+      static int iter = 0;
+      iter++;
+      double cur_time = iter * 0.002;
+
+      int leg_id = this->_data->leg_motion->GetID();
+      Eigen::Vector3d offset
+              = this->_data->leg_motion->GetTorsoOffset(cur_time);
+
+      _wbc_data->pBody_des[0] += offset.x();
+      _wbc_data->pBody_des[1] += offset.y();
+
+      Eigen::Vector3d foot_pos, foot_vel;
+      bool contact;
+      this->_data->leg_motion->Sample(cur_time, foot_pos, foot_vel, contact);
+      _wbc_data->pFoot_des[leg_id] = foot_pos.cast<T>() + _wbc_data->pBody_des;
+      _wbc_data->vFoot_des[leg_id] = foot_vel.cast<T>();
+
+      if (!contact)
+        _wbc_data->Fr_des[leg_id].setZero();
+
+      std::cout << "body " << _wbc_data->pBody_des.transpose() << std::endl;
+      std::cout << "foot " << _wbc_data->pFoot_des[leg_id].transpose() << std::endl;
+
+      _wbc_data->contact_state[leg_id] = contact ? 1. : -1.;
   }
   
   if(this->_data->_desiredStateCommand->trigger_pressed) {

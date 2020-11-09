@@ -85,11 +85,15 @@ void ConvexMPCLocomotion::_SetupCommand(ControlFSMData<float> & data){
     const rc_control_settings* rc_cmd = data._desiredStateCommand->rcCommand;
     data.userParameters->cmpc_gait = rc_cmd->variable[0];
     _yaw_turn_rate = -rc_cmd->omega_des[2];
+    _roll_des = rc_cmd->rpy_des[0];
+    _pitch_des = rc_cmd->rpy_des[1];
     x_vel_cmd = rc_cmd->v_des[0];
     y_vel_cmd = rc_cmd->v_des[1] * 0.5;
     _body_height += rc_cmd->height_variation * 0.08;
   }else{
     _yaw_turn_rate = data._desiredStateCommand->rightAnalogStick[0];
+//    _pitch_des = data._desiredStateCommand->rightAnalogStick[1] * 0.6;
+    _roll_des = data._desiredStateCommand->rightAnalogStick[1] * 0.6;
     x_vel_cmd = data._desiredStateCommand->leftAnalogStick[1];
     y_vel_cmd = data._desiredStateCommand->leftAnalogStick[0];
   }
@@ -97,13 +101,111 @@ void ConvexMPCLocomotion::_SetupCommand(ControlFSMData<float> & data){
   _y_vel_des = _y_vel_des*(1-filter) + y_vel_cmd*filter;
 
   _yaw_des = data._stateEstimator->getResult().rpy[2] + dt * _yaw_turn_rate;
-  _roll_des = 0.;
-  _pitch_des = 0.;
+//  _roll_des = 0.0;
+  _pitch_des = 0.0;
 
 }
 
+//#include <unistd.h>
 template<>
 void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
+    if (data.traj && data.traj->Active())
+    {
+        Kp << 70, 0, 0,
+           0, 70, 0,
+           0, 0, 15;
+        Kp_stance = 0*Kp;
+
+
+        Kd << 7, 0, 0,
+           0, 7, 0,
+           0, 0, 7;
+        Kd_stance = Kd;
+
+        // use trajectory instead of mpc
+        double time = iterationCounter * dt;
+        iterationCounter++;
+
+//        std::cout << "cur time: " << time << std::endl;
+
+        Eigen::Vector3d torso_pos;
+        Eigen::Vector3d torso_vel;
+        Eigen::Quaterniond torso_rot;
+        Eigen::Vector3d torso_rot_vel;
+
+        data.traj->SampleTorso(time,
+                               torso_pos, torso_vel,
+                               torso_rot, torso_rot_vel);
+
+        const auto& res = data._stateEstimator->getResult();
+
+        // Update For WBC
+        pBody_des = res.position + torso_vel.cast<float>() * dt;
+        pBody_des.z() = torso_pos.z();
+        vBody_des = torso_vel.cast<float>();
+        aBody_des.setZero();
+
+        Vec3<double> offset = - (0.2 * (vBody_des - res.vWorld)
+                                 /*- 0.2 * res.vWorld*/).cast<double>();
+        offset.z() = 0;
+
+        pBody_RPY_des = torso_rot.toRotationMatrix().eulerAngles(0, 1, 2)
+                .cast<float>();
+
+        vBody_Ori_des = torso_rot_vel.cast<float>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            Eigen::Vector3d foot_pos;
+            Eigen::Vector3d foot_vel;
+            Eigen::Vector3d foot_acc;
+            Eigen::Vector3d foot_force;
+            bool contact;
+            data.traj->SampleFoot(time, i,
+                                  foot_pos, foot_vel, foot_acc,
+                                  foot_force, contact);
+
+            data._legController->commands[i].pDes
+                    = (torso_rot.conjugate() * (foot_pos - torso_pos)).cast<float>()
+                    - data._quadruped->getHipLocation(i);
+
+//            std::cout << "leg " << i << " contact: " << contact << " pos "
+//                      << data._legController->commands[i].pDes.transpose() << std::endl;
+
+            if (!contact)
+                data._legController->commands[i].pDes += (torso_rot.conjugate() * offset).cast<float>();
+
+            data._legController->commands[i].vDes
+                    = (torso_rot * (foot_vel - torso_vel)
+                       - torso_rot_vel.cross(
+                           data._legController->commands[i].pDes.cast<double>()))
+                    .cast<float>();
+
+            pFoot_des[i] = torso_rot.cast<float>()
+                    * (data._legController->commands[i].pDes + data._quadruped->getHipLocation(i))
+                    + pBody_des;
+            vFoot_des[i] = foot_vel.cast<float>();
+            aFoot_des[i] = foot_acc.cast<float>();
+            Fr_des[i] = foot_force.cast<float>();
+            contact_state(i) = contact ? 1. : - 1.;
+
+            if (contact)
+            {
+                data._legController->commands[i].kpCartesian = Kp_stance;
+                data._legController->commands[i].kdCartesian = Kd_stance;
+            }
+            else
+            {
+                data._legController->commands[i].kpCartesian = Kp;
+                data._legController->commands[i].kdCartesian = Kd;
+            }
+        }
+
+        // END of WBC Update
+
+        return;
+    }
+
   bool omniMode = false;
 
   // Command Setup
@@ -455,8 +557,8 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
 
   aBody_des.setZero();
 
-  pBody_RPY_des[0] = 0.;
-  pBody_RPY_des[1] = 0.; 
+  pBody_RPY_des[0] = _roll_des;
+  pBody_RPY_des[1] = _pitch_des;
   pBody_RPY_des[2] = _yaw_des;
 
   vBody_Ori_des[0] = 0.;

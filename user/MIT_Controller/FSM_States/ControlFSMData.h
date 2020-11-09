@@ -8,6 +8,8 @@
 #include "Controllers/LegController.h"
 #include "Controllers/StateEstimatorContainer.h"
 #include "Dynamics/Quadruped.h"
+#include "TrajFollower/TrajHolder.h"
+#include "TrajFollower/OneLegMotion.h"
 
 /**
  *
@@ -23,6 +25,9 @@ struct ControlFSMData {
   RobotControlParameters* controlParameters;
   MIT_UserParameters* userParameters;
   VisualizationData* visualizationData;
+
+  TrajHolder* traj = nullptr;
+  OneLegMotion* leg_motion = nullptr;
 };
 
 template struct ControlFSMData<double>;
